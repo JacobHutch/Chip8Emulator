@@ -3,10 +3,12 @@
 #include <fstream>
 #include <iomanip>
 #include <cstdlib>
+#include <ctime>
 #include "Emulator.h"
 
 Emulator::Emulator() : mRunning(true), mStackPointer(0), mOpcode(0), mIndexRegister(0), mProgramCounter(0x200), mDrawFlag(true) {
-  for(int i = 0; i < 4096; i++) {
+    srand(time(NULL));
+    for(int i = 0; i < 4096; i++) {
 		mMemory[i] = 0;
 	}
   for(int i = 0; i < 2048; i++) {
@@ -22,19 +24,22 @@ Emulator::Emulator() : mRunning(true), mStackPointer(0), mOpcode(0), mIndexRegis
 }
 
 void Emulator::loadGame(std::string const& game) {
-	mRom.open(game, std::ios::binary);
+	mRom.open(game, std::ios::in | std::ios::binary);
+    size_t size;
 	if(mRom.fail()) {
 		std::cout << "Error - no ROM file named " << game << " found!!" << std::endl;
 		mRunning = false;
 	}
 	else {
-		int i = mProgramCounter;
+		/*int i = mProgramCounter;
 		while(mRom) {
-			mRom >> mMemory[i + (((i % 2) * 2) - 1)];
+			mRom >> mMemory[i];
+            std::cout << std::hex << static_cast<int>(mMemory[i]) << " ";
             mGraphics[i] = mMemory[i];
 			i += 1;
-		}
+		}*/
 	}
+    mRom.close();
 }
 
 bool Emulator::getRunningStatus() {
@@ -44,6 +49,7 @@ bool Emulator::getRunningStatus() {
 void Emulator::cycle() {
 	getOpcode();
 	executeOpcode();
+    std::cout << mOpcode << std::endl;
 
     if(mDelayTimer > 0) {
         mDelayTimer -= 1;
@@ -68,7 +74,7 @@ void Emulator::executeOpcode() {
 
         case 0x00E0:
             for (int i = 0; i < 2048; i++) {
-                mGraphics[i] = '0';
+                mGraphics[i] = 0;
             }
             mDrawFlag = true;
             mProgramCounter += 2;
@@ -81,6 +87,7 @@ void Emulator::executeOpcode() {
             break;
 
         default:
+            std::cout << "Bruh" << std::endl;
             mProgramCounter += 2;
             break;
         }
@@ -225,7 +232,7 @@ void Emulator::executeOpcode() {
         break;
 
     case 0xC000:
-        mRegister[(mOpcode & 0x0F00) >> 8] = rand() & (mOpcode & 0x00FF);
+        mRegister[(mOpcode & 0x0F00) >> 8] = (rand() % 0xFF) & (mOpcode & 0x00FF);
         mProgramCounter += 2;
         break;
 
@@ -317,6 +324,9 @@ void Emulator::executeOpcode() {
             break;
 
         case 0x0033:
+            mMemory[mIndexRegister] = mRegister[(mOpcode & 0x0F00) >> 8] / 100;
+            mMemory[mIndexRegister + 1] = (mRegister[(mOpcode & 0x0F00) >> 8] / 10) % 10;
+            mMemory[mIndexRegister + 2] = (mRegister[(mOpcode & 0x0F00) >> 8] % 100) % 10;
             mProgramCounter += 2;
             break;
 

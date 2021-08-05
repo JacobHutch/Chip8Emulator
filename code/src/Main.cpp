@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
 	Emulator chip8;
 
 	std::string romLocations("./roms/");
-	std::string defaultRom("pong");
+	std::string defaultRom("pong2");
 	std::string fileExtension(".ch8");
 
 	if(argc > 1) {
@@ -30,9 +30,9 @@ int main(int argc, char **argv) {
 	for(int i = 0; i < graphicSize; i++) {
 		screen[i] = '?';
 	}
-	HANDLE displayHandle = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	/*HANDLE displayHandle = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	SetConsoleActiveScreenBuffer(displayHandle);
-	DWORD dwHandle = 0;
+	DWORD dwHandle = 0;*/
 
 	while(chip8.getRunningStatus()) {
 		chip8.cycle();
@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
 		if(chip8.getDrawFlag()) {
 		  chip8.setDrawFlag(false);
 		  emulatorToScreen(chip8.getGraphics(),screen);
-		  WriteConsoleOutputCharacter(displayHandle, screen, winWidth * winHeight, {0,0}, &dwHandle);
+		  //WriteConsoleOutputCharacter(displayHandle, screen, winWidth * winHeight, {0,0}, &dwHandle);
 		}
 	}
 
@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
 }
 
 void emulatorToScreen(unsigned char* graphics, char* screen) {
-  std::cout << graphics << std::endl;
+  //std::cout << graphics << std::endl;
   for(int i = 0; i < graphicSize; i++) {
     if(graphics[i] == 0) {
       screen[i] = ' ';
